@@ -15,7 +15,12 @@ const MyHeader = () => {
 
 class App extends Component {
   render() {
-    return <div>{this.props.children}</div>
+    return (
+      <div>
+        <MyHeader />
+        {this.props.children}
+      </div>
+    );
   }
 }
 
@@ -59,8 +64,6 @@ class PageIndex extends Component {
 class SearchProfile extends Component {
   render() {
     return (
-      <div>
-        <MyHeader />
         <div className="search-bar">
           <form
             className="input-group"
@@ -75,15 +78,14 @@ class SearchProfile extends Component {
             </span>
           </form>
         </div>
-      </div>
+
     )
   }
 
   handleForm(e) {
    e.preventDefault();
-    let username = this.refs.username.getDOMNode().value
-    this.props.fetchSearch(username);
-    this.refs.username.getDOMNode().value = '';
+    let username = this.refs.username.value
+    this.props.fetchSearch(username);    
   }
 }
 
@@ -102,7 +104,7 @@ class Profiles extends Component {
         else{
           let userList = data.items.map(function (name){
             return (
-                <Link className="animated fadeInRight" to={"user/" + name.login}>
+                <Link key={name.id} className="animated fadeInRight" to={"user/" + name.login}>
                 <div className="bs-callout bs-callout-info">
                   <img className="user" src={name.avatar_url}/>
                   <h4>Username : {name.login}</h4>
@@ -128,7 +130,7 @@ class UserProfile extends Component {
     super(props)
     this.state = {
       user: '',
-      repo: ''
+      repo: []
     }
   }
 
@@ -140,7 +142,6 @@ class UserProfile extends Component {
         this.setState({
           user: data
         })
-        console.log(this.state.user);
       })
   }
 
@@ -152,7 +153,6 @@ class UserProfile extends Component {
         this.setState({
           repo: data
         })
-        console.log(this.state.repo);
       })
   }
   componentWillMount() {
@@ -168,7 +168,7 @@ class UserProfile extends Component {
 
       let repoList = repos.map(function(repo){
         return (
-            <li><a href={repo.html_url}>{repo.name}</a></li>
+            <li key={repo.id}><a href={repo.html_url}>{repo.name}</a></li>
         );
       })
 
@@ -201,7 +201,7 @@ class UserProfile extends Component {
                                       <br />
                                       <i className="glyphicon glyphicon-globe"></i><a href={user.blog}>{user.blog}</a>
                                       <br />
-                                      <i className="glyphicon glyphicon-gift"></i>{user.bio}
+                                      <i className="glyphicon glyphicon-user"></i>{user.bio}
                                     </p>
                                     <h4>Repository List</h4>
                                     <ul>{repoList}</ul>
