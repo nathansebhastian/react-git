@@ -4,6 +4,15 @@ import { Link, Router, Route, IndexRoute, browserHistory } from 'react-router';
 
 const API = 'https://api.github.com/';
 
+const MyHeader = () => {
+  return (
+    <div className="jumbotron">
+      <h1>Github Search App</h1>
+      <p>Search users in GitHub using this simple app.</p>
+    </div>
+  );
+};
+
 class App extends Component {
   render() {
     return <div>{this.props.children}</div>
@@ -40,7 +49,7 @@ class PageIndex extends Component {
     return (
       <div>
        <SearchProfile fetchSearch={this.fetchSearch.bind(this)}/>
-       <Profile data={this.state.data} />
+       <Profiles data={this.state.data} />
       </div>
     )
   }
@@ -50,10 +59,27 @@ class PageIndex extends Component {
 class SearchProfile extends Component {
   render() {
     return (
-      <div className="search--box">
-         <form onSubmit={this.handleForm.bind(this)}>
-           <label><input type="search" ref="username" placeholder="Type Username here and press Enter"/></label>
-         </form>
+      <div>
+        <MyHeader />
+        <div className="search-bar">
+          <form
+            className="input-group"
+            onSubmit={this.handleForm.bind(this)}>
+            <input
+              type="search"
+              ref="username"
+              placeholder="Type Username here and press Enter"
+              className="form-control"/>
+            <span className="input-group-btn">
+              <button type="submit" className="btn btn-warning">Submit</button>
+            </span>
+          </form>
+
+           {/* <form onSubmit={this.handleForm.bind(this)}>
+             <input type="search" ref="username" placeholder="Type Username here and press Enter"/>
+
+           </form> */}
+        </div>
       </div>
     )
   }
@@ -66,7 +92,7 @@ class SearchProfile extends Component {
   }
 }
 
-class Profile extends Component {
+class Profiles extends Component {
   render() {
     if(this.props.data){
       let data = this.props.data;
@@ -81,13 +107,14 @@ class Profile extends Component {
         else{
           let userList = data.items.map(function (name){
             return (
-              <ul>
-                <Link to={"user/" + name.login}>
-                  <li>Username : {name.login}</li>
-                  <li><img src={name.avatar_url}/></li>
-                  <li>{name.id}</li>
+                <Link className="animated fadeInRight" to={"user/" + name.login}>
+                <div className="bs-callout bs-callout-info">
+                  <img className="user" src={name.avatar_url}/>
+                  <h4>Username : {name.login}</h4>
+                  <p> Url : {name.html_url}</p>
+                  <p> Score : {name.score} </p>
+                </div>
                 </Link>
-              </ul>
             );
           })
           return (
