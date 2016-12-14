@@ -3,11 +3,11 @@ import ReactDOM, {render} from 'react-dom';
 import { Link, Router, Route, IndexRoute, browserHistory } from 'react-router';
 
 const API = 'https://api.github.com/';
+
 class App extends Component {
   render() {
     return <div>{this.props.children}</div>
   }
-
 }
 
 class PageIndex extends Component {
@@ -16,10 +16,9 @@ class PageIndex extends Component {
     this.state = {
       search: 'yonathansebhastian',
       data: '',
-      user: '',
-      repo: ''
     }
   }
+
   fetchSearch(username) {
     let url = `${API}search/users?q=${username}`;
     fetch(url)
@@ -28,14 +27,15 @@ class PageIndex extends Component {
         this.setState({
           data: data
         })
-        console.log(this.state.data);
       })
       .catch((error) => console.log('Oops! . There Is A Problem') )
 
   }
+
   componentWillMount() {
     this.fetchSearch(this.state.search);
   }
+
   render() {
     return (
       <div>
@@ -44,6 +44,7 @@ class PageIndex extends Component {
       </div>
     )
   }
+
 }
 
 class SearchProfile extends Component {
@@ -119,7 +120,6 @@ class UserProfile extends Component {
         })
         console.log(this.state.user);
       })
-      .catch((error) => console.log('Oops! . There Is A Problem') )
   }
 
   fetchRepo(username) {
@@ -132,7 +132,6 @@ class UserProfile extends Component {
         })
         console.log(this.state.repo);
       })
-      .catch((error) => console.log('Oops! . There Is A Problem') )
   }
   componentWillMount() {
     this.fetchUser(this.props.params.username);
@@ -142,6 +141,14 @@ class UserProfile extends Component {
   render() {
     if(this.state.user){
       let user = this.state.user;
+      let repos = this.state.repo;
+      let followers = `${user.html_url}/followers`;
+
+      let repoList = repos.map(function(repo){
+        return (
+            <li>{repo.name}</li>
+        );
+      })
 
       if (user.notFound === 'Not Found')
         return (
@@ -156,8 +163,12 @@ class UserProfile extends Component {
                 <Link to="/" >
                   Back to Index
                 </Link>
+                <h2><a href={user.html_url}>{user.name}</a></h2>
                 {user.bio}
                 {user.blog}
+                {user.following}
+                <h4>Repository List</h4>
+                <ul>{repoList}</ul>
               </div>
             );
         }
