@@ -1,111 +1,176 @@
 import React, {Component} from 'react';
 import ReactDOM, {render} from 'react-dom';
-import { Provider, connect } from 'react-redux';
-import { applyMiddleware, createStore, combineReducers, bindActionCreators } from 'redux';
+import { Link, Router, Route, IndexRoute, browserHistory } from 'react-router';
 
-// Redux Action Types
-const GET_LOCATION = 'GET_LOCATION';
+const API = 'https://api.github.com/';
+class App extends Component {
+  render() {
+    return <div>{this.props.children}</div>
+  }
 
-const getLocation = () => {
-  const geolocation = navigator.geolocation;
+}
 
-  const location = new Promise((resolve, reject) => {
-    if (!geolocation) {
-      reject(new Error('Not Supported'));
+class PageIndex extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      search: 'yonathansebhastian',
+      data: '',
+      user: '',
+      repo: ''
     }
-
-    geolocation.getCurrentPosition((position) => {
-      resolve(position);
-    }, () => {
-      reject (new Error('Permission denied'));
-    });
-  });
-
-  return {
-    type: GET_LOCATION,
-    payload: location
   }
-};
+  fetchSearch(username) {
+    let url = `${API}search/users?q=${username}`;
+    fetch(url)
+      .then((res) => res.json() )
+      .then((data) => {
+        this.setState({
+          data: data
+        })
+        console.log(this.state.data);
+      })
+      .catch((error) => console.log('Oops! . There Is A Problem') )
 
-const Header = (props) => {
-  return (
-    <header><h1>{props.title}</h1></header>
-  );
-};
-
-class Location extends Component {
+  }
   componentWillMount() {
-    this.props.getLocation();
+    this.fetchSearch(this.state.search);
   }
-
-  render () {
-    const {coords: {latitude, longitude}} = this.props.location;
-
+  render() {
     return (
       <div>
-        <div>Latitude: <span>{latitude}</span></div>
-        <div>Longitude: <span>{longitude}</span></div>
+       <SearchProfile fetchSearch={this.fetchSearch.bind(this)}/>
+       <Profile data={this.state.data} />
       </div>
-    );
+    )
   }
 }
 
-const mapStateToProps = (state) => {
-  return {location: state.location};
-};
+class SearchProfile extends Component {
+  render() {
+    return (
+      <div className="search--box">
+         <form onSubmit={this.handleForm.bind(this)}>
+           <label><input type="search" ref="username" placeholder="Type Username here and press Enter"/></label>
+         </form>
+      </div>
+    )
+  }
 
-Location = connect(mapStateToProps, {getLocation})(Location);
-
-const App = () => {
-  return (
-    <div>
-      <Header title="Your Location" />
-      <Location />
-    </div>
-  );
-};
-
-const INIT_STATE = {
-  coords: {
-    latitude: 0,
-    longitude: 0
+  handleForm(e) {
+   e.preventDefault();
+    let username = this.refs.username.getDOMNode().value
+    this.props.fetchSearch(username);
+    this.refs.username.getDOMNode().value = '';
   }
 }
 
-const LocationReducer = (state = INIT_STATE, action) => {
-  switch(action.type) {
-  case GET_LOCATION:
-    return action.payload;
-  default:
-    return state
+class Profile extends Component {
+  render() {
+    if(this.props.data){
+      let data = this.props.data;
+
+      if (data.notFound === 'Not Found')
+        return (
+           <div className="notfound">
+              <h2>Oops !!!</h2>
+              <p>The Component Couldn't Find The You Were Looking For . Try Again </p>
+           </div>
+        );
+        else{
+          let userList = data.items.map(function (name){
+            return (
+              <ul>
+                <Link to={"user/" + name.login}>
+                  <li>Username : {name.login}</li>
+                  <li><img src={name.avatar_url}/></li>
+                  <li>{name.id}</li>
+                </Link>
+              </ul>
+            );
+          })
+          return (
+            <div>{userList}</div>
+          );
+        }
+    }
+    else {
+      return <div>Fetching data . . .</div>
+    }
   }
 }
 
-const rootReducer = combineReducers ({
-  location: LocationReducer
-});
-
-/* simplified React Promise Middleware */
-function promiseMiddleware({dispatch}) {
-  function isPromise(val) {
-    return val && typeof val.then === 'function';
+class UserProfile extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      user: '',
+      repo: ''
+    }
   }
 
-  return next => action => {
-    return isPromise(action.payload)
-      ? action.payload.then(
-          result => dispatch({...action, payload: result}),
-          error => dispatch({...action, payload: error, error: true })
-        )
-      : next(action);
-  };
+  fetchUser(username) {
+    let url = `${API}users/${username}`;
+    fetch(url)
+      .then((res) => res.json() )
+      .then((data) => {
+        this.setState({
+          user: data
+        })
+        console.log(this.state.user);
+      })
+      .catch((error) => console.log('Oops! . There Is A Problem') )
+  }
+
+  fetchRepo(username) {
+    let url = `${API}users/${username}/repos`;
+    fetch(url)
+      .then((res) => res.json() )
+      .then((data) => {
+        this.setState({
+          repo: data
+        })
+        console.log(this.state.repo);
+      })
+      .catch((error) => console.log('Oops! . There Is A Problem') )
+  }
+  componentWillMount() {
+    this.fetchUser(this.props.params.username);
+    this.fetchRepo(this.props.params.username);
+  }
+
+  render() {
+    if(this.state.user){
+      let user = this.state.user;
+
+      if (user.notFound === 'Not Found')
+        return (
+           <div className="notfound">
+              <h2>Oops !!!</h2>
+              <p>The Component Couldn't Find The You Were Looking For . Try Again </p>
+           </div>
+        );
+        else{
+            return (
+              <div>
+                <Link to="/" >
+                  Back to Index
+                </Link>
+                {user.bio}
+                {user.blog}
+              </div>
+            );
+        }
+    }
+    else {
+      return <div>Please wait . . .</div>
+    }
+  }
 }
 
-const createStoreWithMiddleware = applyMiddleware(promiseMiddleware)(createStore);
-
-render(
-  <Provider store={createStoreWithMiddleware(rootReducer)}>
-    <App />
-  </Provider>
-  , document.querySelector('#app')
-);
+render(<Router history={browserHistory}>
+  <Route path ="/" component={App} >
+    <IndexRoute component={PageIndex} />
+    <Route path = "user/:username" component={UserProfile} />
+  </Route>
+</Router>, document.querySelector('#app'));
