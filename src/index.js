@@ -74,11 +74,6 @@ class SearchProfile extends Component {
               <button type="submit" className="btn btn-warning">Submit</button>
             </span>
           </form>
-
-           {/* <form onSubmit={this.handleForm.bind(this)}>
-             <input type="search" ref="username" placeholder="Type Username here and press Enter"/>
-
-           </form> */}
         </div>
       </div>
     )
@@ -97,7 +92,7 @@ class Profiles extends Component {
     if(this.props.data){
       let data = this.props.data;
 
-      if (data.notFound === 'Not Found')
+      if (data.message === 'Not Found')
         return (
            <div className="notfound">
               <h2>Oops !!!</h2>
@@ -173,11 +168,11 @@ class UserProfile extends Component {
 
       let repoList = repos.map(function(repo){
         return (
-            <li>{repo.name}</li>
+            <li><a href={repo.html_url}>{repo.name}</a></li>
         );
       })
 
-      if (user.notFound === 'Not Found')
+      if (user.message === 'Not Found')
         return (
            <div className="notfound">
               <h2>Oops !!!</h2>
@@ -186,17 +181,36 @@ class UserProfile extends Component {
         );
         else{
             return (
-              <div>
-                <Link to="/" >
+              <div className="container">
+                <Link to="/" className="btn btn-primary" style={{marginBottom: "20px"}}>
                   Back to Index
                 </Link>
-                <h2><a href={user.html_url}>{user.name}</a></h2>
-                {user.bio}
-                {user.blog}
-                {user.following}
-                <h4>Repository List</h4>
-                <ul>{repoList}</ul>
+                <div className="row">
+                  <div className="col-xs-12 col-sm-6 col-md-6">
+                      <div className="well well-sm">
+                          <div className="row">
+                              <div className="col-sm-6 col-md-4">
+                                  <img src={user.avatar_url} alt="" className="img-rounded img-responsive" />
+                              </div>
+                              <div className="col-sm-6 col-md-8">
+                                  <h3><a href={user.html_url}>{user.name}</a></h3>
+                                  <small><cite title={user.location}>{user.location} <i className="glyphicon glyphicon-map-marker">
+                                  </i></cite></small>
+                                    <p>
+                                      <i className="glyphicon glyphicon-envelope"></i>{user.email}
+                                      <br />
+                                      <i className="glyphicon glyphicon-globe"></i><a href={user.blog}>{user.blog}</a>
+                                      <br />
+                                      <i className="glyphicon glyphicon-gift"></i>{user.bio}
+                                    </p>
+                                    <h4>Repository List</h4>
+                                    <ul>{repoList}</ul>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
               </div>
+            </div>
             );
         }
     }

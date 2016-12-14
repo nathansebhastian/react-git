@@ -108,3 +108,18 @@ a:hover {
 .bs-callout-info h4 {
     color: #5bc0de;
 }
+
+.glyphicon {
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+
+.container {
+  padding-top: 30px;
+}
+
+small {
+display: block;
+line-height: 1.428571429;
+color: #999;
+}
